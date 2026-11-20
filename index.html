@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pièges photo PNSO : saisie terrain</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2f6b3f">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#f4f6f3;--card:#fff;--tx:#1d2a20;--mut:#5c6b60;--bd:#cdd6cf;--ac:#2f6b3f;--ac-tx:#fff;--warn:#9a5b00;--err:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a14;--card:#1b261e;--tx:#e7efe9;--mut:#9fb0a4;--bd:#34443a;--ac:#6fbf84;--ac-tx:#0e1a11;--warn:#e0a54a;--err:#f2867f}}
+:root[data-theme="dark"]{--bg:#121a14;--card:#1b261e;--tx:#e7efe9;--mut:#9fb0a4;--bd:#34443a;--ac:#6fbf84;--ac-tx:#0e1a11;--warn:#e0a54a;--err:#f2867f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:640px;margin:0 auto;padding:12px}
+h1{font-size:1.2rem;margin:4px 0 2px}h2{font-size:1rem;margin:0 0 8px}
+.sub{color:var(--mut);font-size:.85rem;margin:0 0 12px}
+.bar{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;font-size:.85rem;margin-bottom:8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 3px}
+input,select,textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px}
+.row,.team{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.team{gap:6px}
+.team label{display:flex;align-items:center;gap:8px;margin:0;color:var(--tx);font-size:.9rem;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px}
+.team input{width:auto}
+button{font:inherit;border:0;border-radius:10px;padding:12px 14px;background:var(--ac);color:var(--ac-tx);font-weight:600;cursor:pointer}
+button.sec{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+button.sm{padding:4px 8px;font-weight:400;background:transparent;color:var(--ac)}
+button.del{color:var(--err)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btns button{flex:1}
+.gps{font-size:.85rem;margin-top:6px;color:var(--mut)}
+.msg{font-size:.9rem;margin-top:8px}.err{color:var(--err)}.warn{color:var(--warn)}
+.v{border-top:1px solid var(--bd);padding:8px 0;display:flex;justify-content:space-between;gap:8px;font-size:.9rem}
+.tag{font-size:.75rem;color:var(--mut)}
+textarea{font:12px/1.3 ui-monospace,Menlo,monospace;min-height:110px}
+summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<div id="bar" class="bar"></div>
+<h1>Pièges photo : saisie terrain</h1>
+<p class="sub">PNSO. Les visites sont enregistrées sur ce téléphone, sans réseau. Le brouillon est sauvegardé à chaque saisie.</p>
+
+<div class="card">
+<h2 id="ft">Nouvelle visite</h2>
+<div class="row">
+<div><label for="d">Date</label><input id="d" type="date"></div>
+<div><label for="h">Heure</label><input id="h" type="time"></div>
+</div>
+<label for="st">Station *</label>
+<input id="st" list="sts" placeholder="SA05" autocapitalize="characters" autocomplete="off"><datalist id="sts"></datalist>
+<label for="ty">Type d’intervention *</label><select id="ty"></select>
+<label for="et">État de la caméra à l’issue *</label><select id="et"></select>
+<div class="row">
+<div><label for="ba">Batterie à l’arrivée</label><select id="ba"></select></div>
+<div><label for="bi">Batterie à l’issue</label><select id="bi"></select></div>
+<div><label for="br">Batterie remplacée</label><select id="br"></select></div>
+<div><label for="cm">Carte mémoire à l’issue</label><select id="cm"></select></div>
+<div><label for="dr">Données récupérées</label><select id="dr"></select></div>
+<div><label for="ni">Nombre d’images</label><input id="ni" type="number" min="0" step="1" inputmode="numeric"></div>
+</div>
+<label for="ca">Identifiant caméra (obligatoire à l’installation)</label><input id="ca" placeholder="CA40" autocomplete="off">
+<label>Équipe présente *</label><div class="team" id="eq"></div>
+<label for="ag">Autre agent (nom libre)</label><input id="ag" autocomplete="off">
+<label for="ob">Observations</label><textarea id="ob" style="min-height:70px;font-family:inherit;font-size:16px"></textarea>
+<div class="btns"><button class="sec" id="gps" type="button">Prendre la position GPS</button></div>
+<div class="gps" id="gpsx"></div>
+<label for="mg">Si pas de GPS : motif</label>
+<select id="mg"></select>
+<div class="btns"><button id="sv" type="button">Enregistrer la visite</button><button class="sec" id="an" type="button" style="display:none">Annuler la correction</button></div>
+<div class="msg" id="msg"></div>
+</div>
+
+<div class="card">
+<h2>Visites enregistrées (<span id="n">0</span>)</h2>
+<div id="lst"></div>
+<div class="btns">
+<button id="ex" type="button">Export CSV (script d’import)</button>
+<button class="sec" id="ej" type="button">Paquet JSON (manifeste)</button>
+</div>
+<div id="exz" style="display:none;margin-top:10px">
+<p class="sub">Copiez ce texte dans un fichier ou envoyez-le par messagerie, puis confirmez.</p>
+<textarea id="csv" readonly></textarea>
+<div class="btns"><button class="sec" id="cp" type="button">Copier</button><button class="sec" id="sh" type="button">Partager</button><button id="mk" type="button">Marquer comme exportées</button></div>
+</div>
+<div class="msg" id="msg2"></div>
+</div>
+
+<div class="card">
+<h2>Synchronisation vers le classeur</h2>
+<p class="sub">Dès que le téléphone retrouve du réseau, les visites partent seules vers le classeur Google. Une visite déjà reçue n’est jamais dupliquée.</p>
+<label for="cu">Adresse du service</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+<label for="ct">Code d’accès</label><input id="ct" type="password" autocomplete="off">
+<div class="btns"><button class="sec" id="cs" type="button">Enregistrer</button><button id="sn" type="button">Synchroniser maintenant</button></div>
+<div class="msg" id="msg4"></div>
+</div>
+
+<div class="card">
+<details>
+<summary>Sauvegarde et restauration</summary>
+<p class="sub">Une sauvegarde complète (toutes les visites, y compris exportées) protège contre la perte du téléphone. La restauration fusionne sans créer de doublons.</p>
+<textarea id="rs" placeholder="Texte de sauvegarde"></textarea>
+<div class="btns"><button class="sec" id="bk" type="button">Afficher la sauvegarde</button><button class="sec" id="cb" type="button">Copier</button><button class="sec" id="rt" type="button">Restaurer</button></div>
+<div class="msg" id="msg3"></div>
+</details>
+</div>
+</main>
+<script>
+const L={ty:["Installation","Maintenance de routine","Remplacement batterie","Remplacement carte mémoire","Réparation","Remplacement caméra","Retrait / démontage","Constat vol / vandalisme","Visite (type non précisé)"],
+et:["Fonctionnelle","En panne","Endommagée","Volée","Démontée"],bat:["Bonne","Moyenne","Faible","Vide"],cm:["OK","Presque pleine","Pleine","Défectueuse"],on:["Oui","Non"],
+mg:["Pas de signal GPS","Appareil sans GPS","Station déjà géoréférencée","Autre"]};
+const EQ=["HECHAKBO YANGNA Norbert","ADJAM Nestor","NEDIONLEM Ferdinand","HALIL Mahamat Goni","MALIDA Fidèle","Tallo Ballet Mabali","DOMRAWA Clement"];
+const F=["d","h","st","ty","et","ba","bi","br","cm","dr","ni","ca","ag","ob","mg"];
+const KEY="pnso_visites_v1",DK="pnso_draft",VK="pnso_dev";
+const HEAD="Waypoint ID;Waypoint Date;Waypoint Time;X;Y;Station;Type d'intervention;État de la caméra à l'issue;Batterie à l'arrivée;Batterie remplacée;Batterie à l'issue;Carte mémoire à l'issue;Données récupérées;Nombre d'images récupérées;Identifiant caméra;Équipe;Autre agent;Observations;Précision GPS (m);Horodatage GPS;Motif absence GPS;Appareil";
+let mem=[],pos=null,edit=null,last=[];
+const $=i=>document.getElementById(i);
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
+const uuid=()=>self.crypto&&crypto.randomUUID?crypto.randomUUID():"x"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+let dev=lsGet(VK);if(!dev){dev=uuid();lsSet(VK,dev)}
+const load=()=>{try{const r=lsGet(KEY);return r?JSON.parse(r):mem}catch(e){return mem}};
+const save=a=>{mem=a;return lsSet(KEY,JSON.stringify(a))};
+const esc=s=>String(s==null?"":s).replace(/[;\r\n]+/g," ").trim();
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const say=(id,t,c)=>{$(id).className="msg "+(c||"");$(id).textContent=t};
+function opts(id,a,ph){const s=$(id);s.innerHTML="";s.add(new Option(ph||"—",""));a.forEach(v=>s.add(new Option(v,v)))}
+opts("ty",L.ty,"— choisir —");opts("et",L.et,"— choisir —");opts("ba",L.bat);opts("bi",L.bat);opts("cm",L.cm);opts("br",L.on);opts("dr",L.on);opts("mg",L.mg);
+for(let i=1;i<=80;i++)$("sts").appendChild(new Option("SA"+("0"+i).slice(-2)));
+EQ.forEach(n=>{const l=el("label");const c=el("input");c.type="checkbox";c.value=n;l.appendChild(c);l.appendChild(document.createTextNode(" "+n));$("eq").appendChild(l)});
+const boxes=()=>[].slice.call(document.querySelectorAll("#eq input"));
+function getF(){const o={};F.forEach(i=>o[i]=$(i).value);o.eq=boxes().filter(c=>c.checked).map(c=>c.value);o.pos=pos;return o}
+function setF(o){F.forEach(i=>$(i).value=o&&o[i]!=null?o[i]:"");boxes().forEach(c=>c.checked=!!(o&&o.eq&&o.eq.indexOf(c.value)>-1));pos=o&&o.pos||null;showGps()}
+function now(){const t=new Date(),p=x=>("0"+x).slice(-2);$("d").value=t.getFullYear()+"-"+p(t.getMonth()+1)+"-"+p(t.getDate());$("h").value=p(t.getHours())+":"+p(t.getMinutes())}
+function showGps(){const g=$("gpsx");if(!pos){g.className="gps";g.textContent="Position : non prise";return}
+g.className="gps"+(pos.ac>15?" warn":"");g.textContent="Position : "+(+pos.la).toFixed(6)+" ; "+(+pos.lo).toFixed(6)+" (± "+pos.ac+" m)"+(pos.ac>15?" : précision au-delà de 15 m, reprenez la mesure si possible":"")}
+const draft=()=>{if(!edit)lsSet(DK,JSON.stringify(getF()))};
+document.addEventListener("input",draft);document.addEventListener("change",draft);
+function bar(){const t=lsGet("pnso_last_sync");$("bar").textContent=(navigator.onLine?"En ligne":"Hors ligne")+" · "+load().filter(v=>!v.x).length+" visite(s) à envoyer"+(t?" · dernière synchro "+t.slice(0,16).replace("T"," "):"")}
+addEventListener("online",bar);addEventListener("offline",bar);
+function reset(){edit=null;setF(null);now();lsSet(DK,"");$("ft").textContent="Nouvelle visite";$("sv").textContent="Enregistrer la visite";$("an").style.display="none"}
+function render(){const a=load();$("n").textContent=a.length;bar();$("lst").innerHTML="";if(!a.length)$("lst").appendChild(el("p","sub","Aucune visite."));
+a.slice().reverse().forEach(v=>{const r=el("div","v"),b=el("div");const t=el("b",null,v.st);b.appendChild(t);b.appendChild(document.createTextNode(" · "+v.ty));
+b.appendChild(el("div","tag",v.d+" "+v.h+(v.x?" · exportée":" · à exporter")+(v.la!==""&&v.la!=null?" · GPS ± "+v.ac+" m":" · sans GPS")+(v.hist&&v.hist.length?" · corrigée":"")+(v.er?" · rejetée : "+v.er:"")));r.appendChild(b);
+if(!v.x){const c=el("div"),e=el("button","sm","Corriger"),d=el("button","sm del","Supprimer");e.type=d.type="button";
+e.onclick=()=>{edit=v.id;setF(Object.assign({},v,{eq:(v.eq||"").split(", ").filter(Boolean),pos:v.la!==""&&v.la!=null?{la:v.la,lo:v.lo,ac:v.ac,t:v.gt}:null}));$("ft").textContent="Correction de la visite";$("sv").textContent="Enregistrer la correction";$("an").style.display="";scrollTo(0,0)};
+d.onclick=()=>{if(confirm("Supprimer cette visite ?")){save(load().filter(z=>z.id!==v.id));render()}};c.appendChild(e);c.appendChild(d);r.appendChild(c)}
+$("lst").appendChild(r)})}
+$("an").onclick=reset;
+$("gps").onclick=()=>{if(!navigator.geolocation){$("gpsx").textContent="GPS indisponible sur cet appareil.";return}
+$("gpsx").textContent="Position en cours…";
+navigator.geolocation.getCurrentPosition(p=>{pos={la:p.coords.latitude,lo:p.coords.longitude,ac:Math.round(p.coords.accuracy),t:new Date(p.timestamp).toISOString()};showGps();draft()},
+e=>{$("gpsx").textContent="Position impossible : "+e.message},{enableHighAccuracy:true,timeout:30000,maximumAge:0})};
+$("sv").onclick=()=>{const o=getF(),st=o.st.trim().toUpperCase(),ag=o.ag.trim(),stop=t=>say("msg",t,"err");
+if(!o.d||!o.h)return stop("Date et heure obligatoires.");
+if(!st)return stop("Station obligatoire.");
+if(!o.ty)return stop("Type d’intervention obligatoire.");
+if(!o.et)return stop("État de la caméra obligatoire.");
+if(!o.eq.length&&!ag)return stop("Cochez au moins un agent.");
+if(o.dr==="Non"&&+o.ni>0)return stop("Des images sont comptées alors que « Données récupérées » = Non.");
+const inst=o.ty==="Installation";
+if(inst&&!o.pos&&!o.mg)return stop("Installation : prenez la position GPS ou indiquez le motif d’absence.");
+const w=[],days=(new Date(o.d)-new Date())/864e5,a=load();
+if(days>1||days<-370)w.push("La date semble inhabituelle : vérifiez l’horloge du téléphone.");
+if(inst&&(!o.ca.trim()||/^ca$/i.test(o.ca.trim())))w.push("Identifiant caméra absent ou générique (« CA »).");
+if(o.pos&&o.pos.ac>15)w.push("Précision GPS de "+o.pos.ac+" m, au-delà de 15 m.");
+if(o.br==="Oui"&&/^(Faible|Vide)$/.test(o.bi))w.push("Batterie remplacée, mais état « "+o.bi+" » à l’issue.");
+if(!edit&&a.some(z=>z.st===st&&z.d===o.d&&z.ty===o.ty))w.push("Une visite du même type existe déjà pour cette station ce jour-là.");
+if(w.length&&!confirm(w.join("\n")+"\n\nEnregistrer quand même ?"))return;
+const p=o.pos,v={id:edit||uuid(),d:o.d,h:o.h,st,ty:o.ty,et:o.et,ba:o.ba,br:o.br,bi:o.bi,cm:o.cm,dr:o.dr,ni:o.ni,ca:o.ca.trim(),eq:o.eq.join(", "),ag,ob:o.ob.trim(),
+la:p?p.la:"",lo:p?p.lo:"",ac:p?p.ac:"",gt:p?p.t:"",mg:p?"":o.mg,x:false,cr:new Date().toISOString(),dv:dev},i=edit?a.findIndex(z=>z.id===edit):-1;
+if(i>=0){const old=a[i];v.cr=old.cr;v.hist=(old.hist||[]).concat([Object.assign({},old,{hist:undefined,rt:new Date().toISOString()})]);a[i]=v}else a.push(v);
+const ok=save(a);reset();render();setTimeout(()=>sync(false),500);say("msg",ok?"Visite enregistrée.":"Stockage du navigateur indisponible : visite gardée en mémoire seulement, exportez avant de fermer la page.",ok?"":"warn")};
+async function exp(t){const p=load().filter(v=>!v.x);if(!p.length){say("msg2","Rien à exporter.");$("exz").style.display="none";return}
+last=p.map(v=>v.id);let out;
+if(t==="csv")out=[HEAD].concat(p.map(v=>[v.id,v.d,v.h,v.lo,v.la,v.st,v.ty,v.et,v.ba,v.br,v.bi,v.cm,v.dr,v.ni,v.ca,v.eq,v.ag,v.ob,v.ac,v.gt,v.mg,dev].map(esc).join(";"))).join("\n");
+else{let sha="";try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(JSON.stringify(p)));sha=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){}
+out=JSON.stringify({manifest:{package_id:uuid(),schema_version:"1.0",app_version:"2.0",device_id:dev,generated_at:new Date().toISOString(),project_code:"PNSO",record_counts:{visits:p.length},visits_sha256:sha},visits:p})}
+$("csv").value=out;$("exz").style.display="block";say("msg2","")}
+$("ex").onclick=()=>exp("csv");$("ej").onclick=()=>exp("json");
+function copy(id,m){const t=$(id);t.select();let ok=false;try{ok=document.execCommand("copy")}catch(e){}say(m,ok?"Copié.":"Copie impossible : appuyez longuement dans le texte, « Tout sélectionner », puis « Copier ».")}
+$("cp").onclick=()=>copy("csv","msg2");$("cb").onclick=()=>copy("rs","msg3");
+$("sh").onclick=()=>{if(navigator.share)navigator.share({title:"export PNSO",text:$("csv").value}).catch(()=>{});else say("msg2","Partage indisponible : utilisez « Copier ».")};
+$("mk").onclick=()=>{if(!last.length)return say("msg2","Préparez d’abord un export.");if(!confirm("Confirmer que le texte exporté est bien collé dans un fichier ou envoyé ?"))return;
+const a=load();a.forEach(v=>{if(last.indexOf(v.id)>-1)v.x=true});save(a);last=[];$("exz").style.display="none";render()};
+$("bk").onclick=()=>{$("rs").value=JSON.stringify({device_id:dev,saved_at:new Date().toISOString(),visits:load()});say("msg3","Sauvegarde affichée : copiez-la et conservez-la ailleurs que sur ce téléphone.")};
+$("rt").onclick=()=>{try{const o=JSON.parse($("rs").value),a=load(),ids=new Set(a.map(z=>z.id));let n=0;o.visits.forEach(v=>{if(v&&v.id&&!ids.has(v.id)){a.push(v);n++}});save(a);render();say("msg3",n+" visite(s) restaurée(s).")}catch(e){say("msg3","Texte de sauvegarde illisible.","err")}};
+const CFGK="pnso_cfg",cfg=()=>{try{return JSON.parse(lsGet(CFGK)||"{}")}catch(e){return{}}};
+(()=>{const m=/#cfg=([^&]+)/.exec(location.hash);if(m){try{lsSet(CFGK,atob(decodeURIComponent(m[1])))}catch(e){}history.replaceState(null,"",location.pathname)}})();
+$("cu").value=cfg().u||"";$("ct").value=cfg().t||"";
+$("cs").onclick=()=>{lsSet(CFGK,JSON.stringify({u:$("cu").value.trim(),t:$("ct").value.trim()}));say("msg4","Réglages enregistrés.")};
+let syncing=false;
+async function sync(manual){const c=cfg();if(!c.u||!c.t){if(manual)say("msg4","Renseignez l’adresse du service et le code d’accès.","err");return}
+const p=load().filter(v=>!v.x);if(!p.length){if(manual)say("msg4","Rien à envoyer.");return}
+if(syncing||(!navigator.onLine&&!manual))return;syncing=true;say("msg4","Envoi de "+p.length+" visite(s)…");
+try{const r=await fetch(c.u,{method:"POST",body:JSON.stringify({token:c.t,device:dev,visits:p.map(v=>Object.assign({},v,{hist:undefined}))})});const j=await r.json();
+if(!j.ok)throw new Error(j.error||"refusé");
+const ok=new Set((j.accepted||[]).concat(j.duplicates||[])),bad={};(j.rejected||[]).forEach(x=>bad[x.id]=x.why);
+const b=load();b.forEach(v=>{if(ok.has(v.id)){v.x=true;v.sy=new Date().toISOString();delete v.er}else if(bad[v.id])v.er=bad[v.id]});save(b);lsSet("pnso_last_sync",new Date().toISOString());
+const rj=(j.rejected||[]).length;say("msg4",(j.accepted||[]).length+" envoyée(s), "+(j.duplicates||[]).length+" déjà reçue(s), "+rj+" rejetée(s)."+((j.warnings||[]).length?" À vérifier : "+j.warnings.join(" ; ")+".":""),rj?"warn":"")}
+catch(e){say("msg4","Envoi non confirmé ("+e.message+"). Les visites restent en attente et seront renvoyées.","warn")}
+syncing=false;render()}
+$("sn").onclick=()=>sync(true);addEventListener("online",()=>setTimeout(()=>sync(false),3000));
+mem=load();try{const dr=JSON.parse(lsGet(DK)||"null");if(dr)setF(dr);else{setF(null);now()}}catch(e){setF(null);now()}
+if(!$("d").value||!$("h").value)now();
+render();setTimeout(()=>sync(false),2000);
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
