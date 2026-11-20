@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f6b3f">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{--bg:#f4f6f3;--card:#fff;--tx:#1d2a20;--mut:#5c6b60;--bd:#cdd6cf;--ac:#2f6b3f;--ac-tx:#fff;--warn:#9a5b00;--err:#b3261e;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -37,15 +38,32 @@ button.del{color:var(--err)}
 .tag{font-size:.75rem;color:var(--mut)}
 textarea{font:12px/1.3 ui-monospace,Menlo,monospace;min-height:110px}
 summary{cursor:pointer;font-weight:600}
+<style>
+:root{--sh:0 1px 4px rgba(0,0,0,.15)}
+main{padding-bottom:88px}
+.card{display:none;box-shadow:var(--sh);border-radius:16px;padding:14px}
+body[data-tab="s"] .card[data-t="s"],body[data-tab="v"] .card[data-t="v"],body[data-tab="r"] .card[data-t="r"]{display:block}
+input,select,textarea{border-radius:10px;padding:12px}
+button{border-radius:12px;padding:14px 16px}
+#sv{font-size:1.05rem}
+.hd{display:flex;align-items:center;gap:10px;margin:2px 0 10px}.hd img{width:46px;height:46px;border-radius:12px;object-fit:cover}
+.hd h1{margin:0}.hd .sub{margin:0}.hd button{margin-left:auto;font-size:1.4rem}
+.bar{display:flex;align-items:center;gap:8px;border-radius:999px;padding:6px 12px}
+.bar::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--ac)}.bar.off::before{background:var(--warn)}
+.upd{background:var(--card);border:1px solid var(--warn);color:var(--warn);border-radius:12px;padding:8px 12px;margin-bottom:8px;font-size:.9rem}
+.bad{border-color:var(--err)!important;outline:2px solid var(--err)}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{flex:1;background:transparent;color:var(--mut);border-radius:0;padding:14px 4px;font-weight:600}
+.tabs button.on{color:var(--ac);box-shadow:inset 0 3px 0 var(--ac)}
 </style>
 </head>
-<body>
+<body data-tab="s">
 <main>
+<header class="hd"><img src="icon-192.png" alt=""><div><h1>Pièges PNSO</h1><p class="sub">Saisie terrain · pièges photo · v2.1</p></div><button id="th" type="button" class="sm" aria-label="Changer le thème">◐</button></header>
+<div id="upd" class="upd" style="display:none">Nouvelle version disponible. <button id="upb" type="button" class="sm">Mettre à jour</button></div>
 <div id="bar" class="bar"></div>
-<h1>Pièges photo : saisie terrain</h1>
-<p class="sub">PNSO. Les visites sont enregistrées sur ce téléphone, sans réseau. Le brouillon est sauvegardé à chaque saisie.</p>
 
-<div class="card">
+<div class="card" data-t="s">
 <h2 id="ft">Nouvelle visite</h2>
 <div class="row">
 <div><label for="d">Date</label><input id="d" type="date"></div>
@@ -75,8 +93,9 @@ summary{cursor:pointer;font-weight:600}
 <div class="msg" id="msg"></div>
 </div>
 
-<div class="card">
+<div class="card" data-t="v">
 <h2>Visites enregistrées (<span id="n">0</span>)</h2>
+<select id="fl" style="margin-bottom:6px"><option value="">Toutes les visites</option><option value="p">À envoyer</option><option value="e">Envoyées</option></select>
 <div id="lst"></div>
 <div class="btns">
 <button id="ex" type="button">Export CSV (script d’import)</button>
@@ -90,7 +109,7 @@ summary{cursor:pointer;font-weight:600}
 <div class="msg" id="msg2"></div>
 </div>
 
-<div class="card">
+<div class="card" data-t="r">
 <h2>Synchronisation vers le classeur</h2>
 <p class="sub">Dès que le téléphone retrouve du réseau, les visites partent seules vers le classeur Google. Une visite déjà reçue n’est jamais dupliquée.</p>
 <label for="cu">Adresse du service</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
@@ -99,7 +118,7 @@ summary{cursor:pointer;font-weight:600}
 <div class="msg" id="msg4"></div>
 </div>
 
-<div class="card">
+<div class="card" data-t="r">
 <details>
 <summary>Sauvegarde et restauration</summary>
 <p class="sub">Une sauvegarde complète (toutes les visites, y compris exportées) protège contre la perte du téléphone. La restauration fusionne sans créer de doublons.</p>
@@ -109,6 +128,7 @@ summary{cursor:pointer;font-weight:600}
 </details>
 </div>
 </main>
+<nav class="tabs"><button data-g="s" class="on">Saisie</button><button data-g="v">Visites <span id="tc"></span></button><button data-g="r">Réglages</button></nav>
 <script>
 const L={ty:["Installation","Maintenance de routine","Remplacement batterie","Remplacement carte mémoire","Réparation","Remplacement caméra","Retrait / démontage","Constat vol / vandalisme","Visite (type non précisé)"],
 et:["Fonctionnelle","En panne","Endommagée","Volée","Démontée"],bat:["Bonne","Moyenne","Faible","Vide"],cm:["OK","Presque pleine","Pleine","Défectueuse"],on:["Oui","Non"],
@@ -135,35 +155,37 @@ EQ.forEach(n=>{const l=el("label");const c=el("input");c.type="checkbox";c.value
 const boxes=()=>[].slice.call(document.querySelectorAll("#eq input"));
 function getF(){const o={};F.forEach(i=>o[i]=$(i).value);o.eq=boxes().filter(c=>c.checked).map(c=>c.value);o.pos=pos;return o}
 function setF(o){F.forEach(i=>$(i).value=o&&o[i]!=null?o[i]:"");boxes().forEach(c=>c.checked=!!(o&&o.eq&&o.eq.indexOf(c.value)>-1));pos=o&&o.pos||null;showGps()}
-function now(){const t=new Date(),p=x=>("0"+x).slice(-2);$("d").value=t.getFullYear()+"-"+p(t.getMonth()+1)+"-"+p(t.getDate());$("h").value=p(t.getHours())+":"+p(t.getMinutes())}
+function now(){const t=new Date(),p=x=>("0"+x).slice(-2);$("d").value=t.getFullYear()+"-"+p(t.getMonth()+1)+"-"+p(t.getDate());$("h").value=p(t.getHours())+":"+p(t.getMinutes());try{const le=JSON.parse(lsGet("pnso_lasteq")||"[]");if(le.length)boxes().forEach(c=>c.checked=le.indexOf(c.value)>-1)}catch(e){}}
 function showGps(){const g=$("gpsx");if(!pos){g.className="gps";g.textContent="Position : non prise";return}
 g.className="gps"+(pos.ac>15?" warn":"");g.textContent="Position : "+(+pos.la).toFixed(6)+" ; "+(+pos.lo).toFixed(6)+" (± "+pos.ac+" m)"+(pos.ac>15?" : précision au-delà de 15 m, reprenez la mesure si possible":"")}
 const draft=()=>{if(!edit)lsSet(DK,JSON.stringify(getF()))};
 document.addEventListener("input",draft);document.addEventListener("change",draft);
-function bar(){const t=lsGet("pnso_last_sync");$("bar").textContent=(navigator.onLine?"En ligne":"Hors ligne")+" · "+load().filter(v=>!v.x).length+" visite(s) à envoyer"+(t?" · dernière synchro "+t.slice(0,16).replace("T"," "):"")}
+function bar(){const q=load().filter(v=>!v.x).length;$("tc").textContent=q?"("+q+")":"";$("bar").className="bar"+(navigator.onLine?"":" off");const t=lsGet("pnso_last_sync");$("bar").textContent=(navigator.onLine?"En ligne":"Hors ligne")+" · "+load().filter(v=>!v.x).length+" visite(s) à envoyer"+(t?" · dernière synchro "+t.slice(0,16).replace("T"," "):"")}
 addEventListener("online",bar);addEventListener("offline",bar);
 function reset(){edit=null;setF(null);now();lsSet(DK,"");$("ft").textContent="Nouvelle visite";$("sv").textContent="Enregistrer la visite";$("an").style.display="none"}
 function render(){const a=load();$("n").textContent=a.length;bar();$("lst").innerHTML="";if(!a.length)$("lst").appendChild(el("p","sub","Aucune visite."));
-a.slice().reverse().forEach(v=>{const r=el("div","v"),b=el("div");const t=el("b",null,v.st);b.appendChild(t);b.appendChild(document.createTextNode(" · "+v.ty));
+a.slice().reverse().filter(v=>!$("fl").value||($("fl").value==="p")===!v.x).forEach(v=>{const r=el("div","v"),b=el("div");const t=el("b",null,v.st);b.appendChild(t);b.appendChild(document.createTextNode(" · "+v.ty));
 b.appendChild(el("div","tag",v.d+" "+v.h+(v.x?" · exportée":" · à exporter")+(v.la!==""&&v.la!=null?" · GPS ± "+v.ac+" m":" · sans GPS")+(v.hist&&v.hist.length?" · corrigée":"")+(v.er?" · rejetée : "+v.er:"")));r.appendChild(b);
 if(!v.x){const c=el("div"),e=el("button","sm","Corriger"),d=el("button","sm del","Supprimer");e.type=d.type="button";
-e.onclick=()=>{edit=v.id;setF(Object.assign({},v,{eq:(v.eq||"").split(", ").filter(Boolean),pos:v.la!==""&&v.la!=null?{la:v.la,lo:v.lo,ac:v.ac,t:v.gt}:null}));$("ft").textContent="Correction de la visite";$("sv").textContent="Enregistrer la correction";$("an").style.display="";scrollTo(0,0)};
+e.onclick=()=>{edit=v.id;setF(Object.assign({},v,{eq:(v.eq||"").split(", ").filter(Boolean),pos:v.la!==""&&v.la!=null?{la:v.la,lo:v.lo,ac:v.ac,t:v.gt}:null}));$("ft").textContent="Correction de la visite";$("sv").textContent="Enregistrer la correction";$("an").style.display="";tab("s")};
 d.onclick=()=>{if(confirm("Supprimer cette visite ?")){save(load().filter(z=>z.id!==v.id));render()}};c.appendChild(e);c.appendChild(d);r.appendChild(c)}
 $("lst").appendChild(r)})}
 $("an").onclick=reset;
-$("gps").onclick=()=>{if(!navigator.geolocation){$("gpsx").textContent="GPS indisponible sur cet appareil.";return}
-$("gpsx").textContent="Position en cours…";
-navigator.geolocation.getCurrentPosition(p=>{pos={la:p.coords.latitude,lo:p.coords.longitude,ac:Math.round(p.coords.accuracy),t:new Date(p.timestamp).toISOString()};showGps();draft()},
-e=>{$("gpsx").textContent="Position impossible : "+e.message},{enableHighAccuracy:true,timeout:30000,maximumAge:0})};
-$("sv").onclick=()=>{const o=getF(),st=o.st.trim().toUpperCase(),ag=o.ag.trim(),stop=t=>say("msg",t,"err");
-if(!o.d||!o.h)return stop("Date et heure obligatoires.");
-if(!st)return stop("Station obligatoire.");
-if(!o.ty)return stop("Type d’intervention obligatoire.");
-if(!o.et)return stop("État de la caméra obligatoire.");
-if(!o.eq.length&&!ag)return stop("Cochez au moins un agent.");
-if(o.dr==="Non"&&+o.ni>0)return stop("Des images sont comptées alors que « Données récupérées » = Non.");
+let wid=null,wt=null;
+function stopGps(){if(wid!=null)navigator.geolocation.clearWatch(wid);clearTimeout(wt);wid=null;$("gps").textContent="Prendre la position GPS";showGps();draft()}
+$("gps").onclick=()=>{if(wid!=null)return stopGps();if(!navigator.geolocation){$("gpsx").textContent="GPS indisponible sur cet appareil.";return}
+pos=null;$("gps").textContent="Arrêter la mesure";$("gpsx").textContent="Mesure en cours…";
+wid=navigator.geolocation.watchPosition(p=>{const a=Math.round(p.coords.accuracy);if(!pos||a<pos.ac)pos={la:p.coords.latitude,lo:p.coords.longitude,ac:a,t:new Date(p.timestamp).toISOString()};showGps();$("gpsx").textContent+=" · mesure en cours";if(pos.ac<=8)stopGps()},
+e=>{stopGps();$("gpsx").textContent="Position impossible : "+e.message},{enableHighAccuracy:true,timeout:30000,maximumAge:0});wt=setTimeout(stopGps,25000)};
+$("sv").onclick=()=>{const o=getF(),st=o.st.trim().toUpperCase(),ag=o.ag.trim(),stop=(t,f)=>{say("msg",t,"err");document.querySelectorAll(".bad").forEach(x=>x.classList.remove("bad"));if(f){const e=$(f);e.classList.add("bad");e.scrollIntoView({block:"center"})}};
+if(!o.d||!o.h)return stop("Date et heure obligatoires.","d");
+if(!st)return stop("Station obligatoire.","st");
+if(!o.ty)return stop("Type d’intervention obligatoire.","ty");
+if(!o.et)return stop("État de la caméra obligatoire.","et");
+if(!o.eq.length&&!ag)return stop("Cochez au moins un agent.","eq");
+if(o.dr==="Non"&&+o.ni>0)return stop("Des images sont comptées alors que « Données récupérées » = Non.","ni");
 const inst=o.ty==="Installation";
-if(inst&&!o.pos&&!o.mg)return stop("Installation : prenez la position GPS ou indiquez le motif d’absence.");
+if(inst&&!o.pos&&!o.mg)return stop("Installation : prenez la position GPS ou indiquez le motif d’absence.","gps");
 const w=[],days=(new Date(o.d)-new Date())/864e5,a=load();
 if(days>1||days<-370)w.push("La date semble inhabituelle : vérifiez l’horloge du téléphone.");
 if(inst&&(!o.ca.trim()||/^ca$/i.test(o.ca.trim())))w.push("Identifiant caméra absent ou générique (« CA »).");
@@ -174,7 +196,7 @@ if(w.length&&!confirm(w.join("\n")+"\n\nEnregistrer quand même ?"))return;
 const p=o.pos,v={id:edit||uuid(),d:o.d,h:o.h,st,ty:o.ty,et:o.et,ba:o.ba,br:o.br,bi:o.bi,cm:o.cm,dr:o.dr,ni:o.ni,ca:o.ca.trim(),eq:o.eq.join(", "),ag,ob:o.ob.trim(),
 la:p?p.la:"",lo:p?p.lo:"",ac:p?p.ac:"",gt:p?p.t:"",mg:p?"":o.mg,x:false,cr:new Date().toISOString(),dv:dev},i=edit?a.findIndex(z=>z.id===edit):-1;
 if(i>=0){const old=a[i];v.cr=old.cr;v.hist=(old.hist||[]).concat([Object.assign({},old,{hist:undefined,rt:new Date().toISOString()})]);a[i]=v}else a.push(v);
-const ok=save(a);reset();render();setTimeout(()=>sync(false),500);say("msg",ok?"Visite enregistrée.":"Stockage du navigateur indisponible : visite gardée en mémoire seulement, exportez avant de fermer la page.",ok?"":"warn")};
+lsSet("pnso_lasteq",JSON.stringify(o.eq));const ok=save(a);reset();render();setTimeout(()=>sync(false),500);say("msg",ok?"Visite enregistrée.":"Stockage du navigateur indisponible : visite gardée en mémoire seulement, exportez avant de fermer la page.",ok?"":"warn")};
 async function exp(t){const p=load().filter(v=>!v.x);if(!p.length){say("msg2","Rien à exporter.");$("exz").style.display="none";return}
 last=p.map(v=>v.id);let out;
 if(t==="csv")out=[HEAD].concat(p.map(v=>[v.id,v.d,v.h,v.lo,v.la,v.st,v.ty,v.et,v.ba,v.br,v.bi,v.cm,v.dr,v.ni,v.ca,v.eq,v.ag,v.ob,v.ac,v.gt,v.mg,dev].map(esc).join(";"))).join("\n");
@@ -205,10 +227,15 @@ const rj=(j.rejected||[]).length;say("msg4",(j.accepted||[]).length+" envoyée(s
 catch(e){say("msg4","Envoi non confirmé ("+e.message+"). Les visites restent en attente et seront renvoyées.","warn")}
 syncing=false;render()}
 $("sn").onclick=()=>sync(true);addEventListener("online",()=>setTimeout(()=>sync(false),3000));
+function tab(g){document.body.dataset.tab=g;document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.g===g));scrollTo(0,0)}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>tab(b.dataset.g));
+const theme=t=>{if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme};theme(lsGet("pnso_theme"));
+$("th").onclick=()=>{const n=document.documentElement.dataset.theme==="dark"?"light":"dark";lsSet("pnso_theme",n);theme(n)};
+$("fl").onchange=render;document.addEventListener("input",e=>e.target.classList&&e.target.classList.remove("bad"));
 mem=load();try{const dr=JSON.parse(lsGet(DK)||"null");if(dr)setF(dr);else{setF(null);now()}}catch(e){setF(null);now()}
 if(!$("d").value||!$("h").value)now();
 render();setTimeout(()=>sync(false),2000);
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").then(r=>r.addEventListener("updatefound",()=>{const w=r.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)$("upd").style.display="block"})})).catch(()=>{});$("upb").onclick=()=>location.reload();
 </script>
 </body>
 </html>
