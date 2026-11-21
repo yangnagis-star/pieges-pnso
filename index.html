@@ -55,17 +55,21 @@ button{border-radius:12px;padding:14px 16px}
 .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabs button{flex:1;background:transparent;color:var(--mut);border-radius:0;padding:14px 4px;font-weight:600}
 .tabs button.on{color:var(--ac);box-shadow:inset 0 3px 0 var(--ac)}
-.logos{background:#fff;border-radius:12px;padding:6px 8px;margin-bottom:10px;box-shadow:var(--sh)}.logos img{display:block;width:100%;height:auto}
 .hd button+button{margin-left:0}
-body::before{content:"";position:fixed;right:-10px;bottom:56px;width:min(72vw,380px);height:min(100vw,520px);background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 420'><g fill='%237a8a7e'><ellipse cx='140' cy='255' rx='72' ry='40'/><path d='M178 240 L222 70 L244 76 L212 262 Z'/><ellipse cx='246' cy='62' rx='26' ry='13' transform='rotate(-25 246 62)'/><ellipse cx='230' cy='54' rx='9' ry='4' transform='rotate(-40 230 54)'/><rect x='226' y='28' width='5' height='26' rx='2' transform='rotate(-8 228 40)'/><circle cx='226' cy='27' r='5'/><rect x='244' y='30' width='5' height='24' rx='2' transform='rotate(8 246 42)'/><circle cx='250' cy='28' r='5'/><rect x='186' y='280' width='11' height='115' rx='4'/><rect x='203' y='282' width='11' height='108' rx='4'/><rect x='84' y='280' width='11' height='112' rx='4'/><rect x='101' y='284' width='11' height='104' rx='4'/><path d='M70 238 Q48 270 56 312 L62 312 Q58 272 76 246 Z'/><ellipse cx='59' cy='318' rx='6' ry='10'/></g></svg>") no-repeat right bottom/contain;opacity:.13;pointer-events:none;z-index:0}
 main{position:relative;z-index:1}
 .card{background:color-mix(in srgb,var(--card) 90%,transparent)}
+.hd{gap:8px}.hd>div{min-width:0}.hd .sub{font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wcs{height:46px;width:auto;background:#fff;border-radius:10px;padding:3px;flex:none}
+.hero{display:none}body[data-tab="s"] .hero{display:block;height:24vh}
+body[data-tab="s"]::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+background:linear-gradient(color-mix(in srgb,var(--bg) 38%,transparent),color-mix(in srgb,var(--bg) 38%,transparent)),url(giraffe.jpg) 42% calc(78px + env(safe-area-inset-top,0px))/auto calc(100% - 78px) no-repeat}
+.card[data-t="s"]{background:color-mix(in srgb,var(--card) 84%,transparent);backdrop-filter:blur(3px)}
 </style>
 </head>
 <body data-tab="s">
 <main>
-<header class="hd"><img src="icon-192.png" alt=""><div><h1>Pièges PNSO</h1><p class="sub">Saisie terrain · pièges photo · v2.1</p></div><button id="lg" type="button" class="sm" aria-label="Langue">EN</button><button id="th" type="button" class="sm" aria-label="Changer le thème">◐</button></header>
-<div class="logos"><img src="logos.png" alt="COMIFAC, MEPDD, Coopération allemande, GIZ, KfW, WCS Tchad"></div>
+<header class="hd"><img src="icon-192.png" alt=""><div><h1>Pièges PNSO</h1><p class="sub">Saisie terrain · pièges photo · v2.1</p></div><button id="lg" type="button" class="sm" aria-label="Langue">EN</button><button id="th" type="button" class="sm" aria-label="Changer le thème">◐</button><img class="wcs" src="wcs.png" alt="WCS Tchad"></header>
+<div class="hero"></div>
 <div id="upd" class="upd" style="display:none">Nouvelle version disponible. <button id="upb" type="button" class="sm">Mettre à jour</button></div>
 <div id="bar" class="bar"></div>
 
