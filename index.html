@@ -70,9 +70,20 @@ main{max-width:560px}
 .bn .hdp{flex:1 1 38%;position:relative;background:url(giraffe.jpg) 41% 0/auto 504% no-repeat}
 .bn .wcs{position:absolute;top:8px;right:8px;height:40px;width:auto;background:#fff;border-radius:10px;padding:3px}
 .sc{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ac);margin:20px 0 0;padding-top:12px;border-top:1px solid var(--bd)}
-.sb{position:sticky;bottom:66px;z-index:2;background:linear-gradient(transparent,var(--card) 35%);padding:14px 0 4px;margin-top:8px}
+.sb{position:sticky;bottom:calc(54px + env(safe-area-inset-bottom,0px));z-index:2;margin:10px -14px 0;padding:10px 14px;background:var(--card);border-top:1px solid var(--bd)}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--ac);border-color:var(--ac)}
 .card h2{font-size:1.05rem}
+:root{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+.bn{height:auto;background:color-mix(in srgb,var(--card) 72%,transparent);backdrop-filter:blur(5px)}
+.bn .hdl{flex:1 1 auto;gap:10px}
+.bn .hdp{flex:none;background:none;align-self:flex-start;padding:12px 12px 0 0}
+.bn .wcs{position:static;height:48px}
+.bar{background:color-mix(in srgb,var(--card) 78%,transparent);backdrop-filter:blur(5px)}
+.card[data-t="s"]{background:color-mix(in srgb,var(--card) 72%,transparent);backdrop-filter:blur(5px)}
+.tabs{z-index:5}
+body[data-tab="s"]::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(color-mix(in srgb,var(--bg) 22%,transparent),color-mix(in srgb,var(--bg) 42%,transparent)),url(giraffe.jpg) 45% 0/cover no-repeat}
 </style>
 </head>
 <body data-tab="s">
